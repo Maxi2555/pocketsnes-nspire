@@ -23,8 +23,8 @@ BUILDING FROM SOURCE
 
 ### Prerequisites
 
-You need the **Ndless SDK** which provides the ARM cross-compiler (`nspire-gcc`/`nspire-g++`)
-and the packaging tools (`genzehn`, `make-prg`).
+You need the **Ndless SDK** which provides the ARM cross-compiler (`nspire-gcc`/`nspire-g++`),
+the linker wrapper (`nspire-ld`) and the packaging tools (`genzehn`, `make-prg`).
 
 **Install on Linux / macOS / Windows (WSL):**
 
@@ -36,10 +36,7 @@ cd ~/ndless
 # 2. Build and install the toolchain (~10–20 min)
 ndless-sdk/toolchain/build_toolchain.sh
 
-# 3. Build the Ndless SDK libraries (libnspireio, libndls, libsyscalls)
-make -C ndless-sdk
-
-# 4. Add the toolchain to your PATH (add these lines to ~/.bashrc or ~/.zshrc too)
+# 3. Add the toolchain to your PATH (add these lines to ~/.bashrc or ~/.zshrc too)
 export PATH="$PATH:$HOME/ndless/ndless-sdk/toolchain/install/bin"
 export PATH="$PATH:$HOME/ndless/ndless-sdk/tools"
 ```
