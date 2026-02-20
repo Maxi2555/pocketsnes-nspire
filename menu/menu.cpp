@@ -37,6 +37,12 @@ static struct MENU_OPTIONS *mMenuOptions=NULL;
 static u16 mTempFb[SNES_WIDTH*SNES_HEIGHT_EXTENDED];
 
 									
+void MenuInit(const char *systemDir, struct MENU_OPTIONS *menuOptions)
+{
+	mMenuOptions = menuOptions;
+	strcpy(mSystemDir, systemDir);
+}
+
 void DefaultMenuOptions(void)
 {
 	mMenuOptions->frameSkip=0;   //auto
@@ -204,8 +210,9 @@ s32 MenuRun(s8 *romName)
 {
 	s32 menuExit=0,menuCount=MENU_COUNT,menufocus=0,menuSmooth=0;
 	s32 action=EVENT_NONE;
-	s32 subaction=0;
 	u32 keys=0;
+	int i;
+	static const char *fsLabels[] = {"Auto","1","2","3","4","5","6"};
 
 	sal_CpuSpeedSet(MENU_NORMAL_CPU_SPEED);
 
@@ -216,17 +223,80 @@ s32 MenuRun(s8 *romName)
 		return action;
 	}
 
+	/* clear all menu text entries */
+	for (i = 0; i < MENU_COUNT; i++)
+		mMenuText[i][0] = '\0';
+
+	strcpy(mMenuText[MENU_RETURN],     "Resume Game");
+	strcpy(mMenuText[MENU_RESET_GAME], "Reset Game");
+	strcpy(mMenuText[MENU_EXIT_APP],   "Exit");
+
 	sal_InputIgnore();
 
 	while (!menuExit)
 	{
-		sal_VideoFlip(1);
-		keys=sal_InputPollRepeat();
-	}
-	
-  sal_InputWaitForRelease();
+		/* update dynamic frameskip label */
+		if (mMenuOptions)
+		{
+			unsigned int fs = mMenuOptions->frameSkip < 7 ? mMenuOptions->frameSkip : 6;
+			snprintf(mMenuText[MENU_FRAMESKIP], MAX_DISPLAY_CHARS,
+				"Frameskip: %s", fsLabels[fs]);
+			mMenuText[MENU_FRAMESKIP][MAX_DISPLAY_CHARS - 1] = '\0';
+		}
 
-  return action;
+		/* scroll so the focused item stays near the top of the visible area */
+		menuSmooth = (menufocus - 2) * 256;
+		if (menuSmooth < 0) menuSmooth = 0;
+
+		keys = sal_InputPollRepeat();
+
+		if (keys & SAL_INPUT_UP)
+		{
+			if (menufocus > 0) menufocus--;
+		}
+		if (keys & SAL_INPUT_DOWN)
+		{
+			if (menufocus < menuCount - 1) menufocus++;
+		}
+
+		/* change frameskip value with left/right */
+		if (menufocus == MENU_FRAMESKIP && mMenuOptions)
+		{
+			if ((keys & SAL_INPUT_LEFT) && mMenuOptions->frameSkip > 0)
+				mMenuOptions->frameSkip--;
+			if ((keys & SAL_INPUT_RIGHT) && mMenuOptions->frameSkip < 6)
+				mMenuOptions->frameSkip++;
+		}
+
+		/* confirm selection with A */
+		if (keys & INP_BUTTON_MENU_SELECT)
+		{
+			if (menufocus == MENU_RETURN)
+			{
+				menuExit = 1; action = EVENT_RUN_ROM;
+			}
+			else if (menufocus == MENU_RESET_GAME)
+			{
+				menuExit = 1; action = EVENT_RESET_ROM;
+			}
+			else if (menufocus == MENU_EXIT_APP)
+			{
+				menuExit = 1; action = EVENT_EXIT_APP;
+			}
+		}
+
+		/* B or ESC to resume game */
+		if ((keys & INP_BUTTON_MENU_CANCEL) || (keys & SAL_INPUT_MENU))
+		{
+			menuExit = 1; action = EVENT_RUN_ROM;
+		}
+
+		RenderMenu("PocketSNES", menuCount, menuSmooth, menufocus);
+		sal_VideoFlip(1);
+	}
+
+	sal_InputWaitForRelease();
+	return action;
 }
 
 

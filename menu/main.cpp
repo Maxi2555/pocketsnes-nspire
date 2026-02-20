@@ -206,16 +206,7 @@ uint32 S9xReadJoypad (int which1)
 	{
 		if(mRomName[0] != 0) Memory.SaveSRAM ((s8*)S9xGetFilename (".srm.tns"));
 		sal_InputIgnore();
-		S9xGraphicsDeinit();
-		Memory.Deinit();
-		free(GFX.SubZBuffer);
-		free(GFX.ZBuffer);
-		free(GFX.SubScreen);
-		GFX.SubZBuffer=NULL;
-		GFX.ZBuffer=NULL;
-		GFX.SubScreen=NULL;
-		sal_Reset();	
-		exit(0);
+		mEnterMenu = 1;
 		return val;
 	}
 	
@@ -566,6 +557,8 @@ int mainEntry(char* romname)
 		sal_Reset();
 		return 0;
 	}
+
+	MenuInit(SYSTEM_DIR, &mMenuOptions);
 
 	while(1)
 	{
