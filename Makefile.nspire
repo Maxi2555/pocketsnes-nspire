@@ -1,5 +1,11 @@
 
 # Define the applications properties here:
+#
+# Four build variants (from fastest to most compatible):
+#   pocketsnes_minimal.tns  - no special chips, no transparencies (fastest)
+#   pocketsnes_notrans.tns  - all chips, no transparencies
+#   pocketsnes_nochips.tns  - no special chips, with transparencies
+#   pocketsnes.tns          - all chips, with transparencies (most compatible)
 
 TARGET = PocketSNES
 
@@ -17,9 +23,15 @@ else
 endif
 
 INCLUDE = -Dndlib -I pocketsnes -Isal/linux/ -Isal/ -I sal/linux/include -I sal/include -I pocketsnes/include -I menu -I pocketsnes/linux -I pocketsnes/snes9x
-CFLAGS = -Os -nostdlib -fdata-sections -ffunction-sections -fomit-frame-pointer -marm -march=armv5te -mtune=arm926ej-s -DRC_OPTIMIZED -D__LINUX__ -DFOREVER_16_BIT -DNO_ASM -DNO_ROM_BROWSER $(INCLUDE)
+CFLAGS_BASE = -Os -nostdlib -fdata-sections -ffunction-sections -fomit-frame-pointer -marm -march=armv5te -mtune=arm926ej-s -DRC_OPTIMIZED -D__LINUX__ -DFOREVER_16_BIT -DNO_ASM -DNO_ROM_BROWSER $(INCLUDE)
 
-CXXFLAGS = $(CFLAGS) -Wno-register -Wno-write-strings
+CFLAGS         = $(CFLAGS_BASE)
+CFLAGS_NOTRANS = $(CFLAGS_BASE) -DPOCKETSNES_NO_TRANSPARENCIES
+CFLAGS_NOCHIPS = $(CFLAGS_BASE) -DPOCKETSNES_NO_SPECIAL_CHIPS
+CFLAGS_MINIMAL = $(CFLAGS_BASE) -DPOCKETSNES_NO_TRANSPARENCIES -DPOCKETSNES_NO_SPECIAL_CHIPS
+
+CXXEXTRA = -Wno-register -Wno-write-strings
+CXXFLAGS = $(CFLAGS) $(CXXEXTRA)
 LDFLAGS = -nostdlib -Wl,--gc-sections -Wl,--as-needed -flto -lm
 
 # Find all source files
@@ -30,22 +42,56 @@ OBJ_CPP = $(patsubst %.cpp, %.o, $(SRC_CPP))
 OBJ_C   = $(patsubst %.c, %.o, $(SRC_C))
 OBJS    = $(OBJ_CPP) $(OBJ_C)
 
+OBJ_CPP_NOTRANS = $(patsubst %.cpp, %.notrans.o, $(SRC_CPP))
+OBJ_C_NOTRANS   = $(patsubst %.c,   %.notrans.o, $(SRC_C))
+OBJS_NOTRANS    = $(OBJ_CPP_NOTRANS) $(OBJ_C_NOTRANS)
 
-all: $(TARGET) gen pack removeth
+OBJ_CPP_NOCHIPS = $(patsubst %.cpp, %.nochips.o, $(SRC_CPP))
+OBJ_C_NOCHIPS   = $(patsubst %.c,   %.nochips.o, $(SRC_C))
+OBJS_NOCHIPS    = $(OBJ_CPP_NOCHIPS) $(OBJ_C_NOCHIPS)
 
+OBJ_CPP_MINIMAL = $(patsubst %.cpp, %.minimal.o, $(SRC_CPP))
+OBJ_C_MINIMAL   = $(patsubst %.c,   %.minimal.o, $(SRC_C))
+OBJS_MINIMAL    = $(OBJ_CPP_MINIMAL) $(OBJ_C_MINIMAL)
+
+
+all: build_all gen pack removeth
+
+build_all: $(TARGET) $(TARGET)_notrans $(TARGET)_nochips $(TARGET)_minimal
 
 gen :
 	genzehn --input PocketSNES --output pocket.t --compress
 	make-prg pocket.t pocketsnes.tns
-	
+	rm -f pocket.t
+	genzehn --input PocketSNES_notrans --output pocket.t --compress
+	make-prg pocket.t pocketsnes_notrans.tns
+	rm -f pocket.t
+	genzehn --input PocketSNES_nochips --output pocket.t --compress
+	make-prg pocket.t pocketsnes_nochips.tns
+	rm -f pocket.t
+	genzehn --input PocketSNES_minimal --output pocket.t --compress
+	make-prg pocket.t pocketsnes_minimal.tns
+	rm -f pocket.t
+
 pack:
-	zip -r  PocketSNES-nspire.zip pocketsnes.tns README.md
+	zip -r PocketSNES-nspire.zip pocketsnes.tns pocketsnes_notrans.tns pocketsnes_nochips.tns pocketsnes_minimal.tns README.md
 
 removeth:
-	rm PocketSNES
-	rm pocket.t
+	rm -f PocketSNES PocketSNES_notrans PocketSNES_nochips PocketSNES_minimal
 
 $(TARGET) : $(OBJS)
+	$(SUM) "  LD      $@"
+	$(CMD)$(LD) $(LDFLAGS) -o $@ $^
+
+$(TARGET)_notrans : $(OBJS_NOTRANS)
+	$(SUM) "  LD      $@"
+	$(CMD)$(LD) $(LDFLAGS) -o $@ $^
+
+$(TARGET)_nochips : $(OBJS_NOCHIPS)
+	$(SUM) "  LD      $@"
+	$(CMD)$(LD) $(LDFLAGS) -o $@ $^
+
+$(TARGET)_minimal : $(OBJS_MINIMAL)
 	$(SUM) "  LD      $@"
 	$(CMD)$(LD) $(LDFLAGS) -o $@ $^
 
@@ -57,7 +103,33 @@ $(TARGET) : $(OBJS)
 	$(SUM) "  CXX     $@"
 	$(CMD)$(CXX) $(CFLAGS) -c $< -o $@
 
+%.notrans.o: %.c
+	$(SUM) "  CC      $@"
+	$(CMD)$(CC) $(CFLAGS_NOTRANS) -c $< -o $@
+
+%.notrans.o: %.cpp
+	$(SUM) "  CXX     $@"
+	$(CMD)$(CXX) $(CFLAGS_NOTRANS) $(CXXEXTRA) -c $< -o $@
+
+%.nochips.o: %.c
+	$(SUM) "  CC      $@"
+	$(CMD)$(CC) $(CFLAGS_NOCHIPS) -c $< -o $@
+
+%.nochips.o: %.cpp
+	$(SUM) "  CXX     $@"
+	$(CMD)$(CXX) $(CFLAGS_NOCHIPS) $(CXXEXTRA) -c $< -o $@
+
+%.minimal.o: %.c
+	$(SUM) "  CC      $@"
+	$(CMD)$(CC) $(CFLAGS_MINIMAL) -c $< -o $@
+
+%.minimal.o: %.cpp
+	$(SUM) "  CXX     $@"
+	$(CMD)$(CXX) $(CFLAGS_MINIMAL) $(CXXEXTRA) -c $< -o $@
+
 clean :
 	$(SUM) "  CLEAN   ."
-	$(CMD)rm -f $(OBJS) $(TARGET)
-	$(CMD)rm -rf .opk_data $(TARGET).opk
+	$(CMD)rm -f $(OBJS) $(OBJS_NOTRANS) $(OBJS_NOCHIPS) $(OBJS_MINIMAL)
+	$(CMD)rm -f $(TARGET) $(TARGET)_notrans $(TARGET)_nochips $(TARGET)_minimal
+	$(CMD)rm -f pocketsnes.tns pocketsnes_notrans.tns pocketsnes_nochips.tns pocketsnes_minimal.tns
+	$(CMD)rm -f PocketSNES-nspire.zip pocket.t

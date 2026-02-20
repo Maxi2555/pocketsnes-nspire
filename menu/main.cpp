@@ -457,18 +457,30 @@ int SnesInit()
 	Settings.FixFrequency = FALSE;
 	//Settings.NoPatch = true;		
 
+#ifdef POCKETSNES_NO_SPECIAL_CHIPS
+	Settings.SuperFX = FALSE;
+	Settings.DSP1Master = FALSE;
+	Settings.SA1 = FALSE;
+	Settings.C4 = FALSE;
+	Settings.SDD1 = FALSE;
+#else
 	Settings.SuperFX = TRUE;
 	Settings.DSP1Master = TRUE;
 	Settings.SA1 = TRUE;
 	Settings.C4 = TRUE;
 	Settings.SDD1 = TRUE;
+#endif
+
+#ifdef POCKETSNES_NO_TRANSPARENCIES
+	Settings.ForceNoTransparency = TRUE;
+#endif
 
 	GFX.Screen = (uint8*) IntermediateScreen;
 	GFX.RealPitch = GFX.Pitch = 256 * sizeof(u16);
 	
-	GFX.SubScreen = (uint8 *)malloc(GFX.RealPitch * 480 * 2); 
-	GFX.ZBuffer =  (uint8 *)malloc(GFX.RealPitch * 480 * 2); 
-	GFX.SubZBuffer = (uint8 *)malloc(GFX.RealPitch * 480 * 2);
+	GFX.SubScreen = (uint8 *)malloc(GFX.RealPitch * SNES_HEIGHT_EXTENDED * 2); 
+	GFX.ZBuffer =  (uint8 *)malloc(GFX.RealPitch * SNES_HEIGHT_EXTENDED * 2); 
+	GFX.SubZBuffer = (uint8 *)malloc(GFX.RealPitch * SNES_HEIGHT_EXTENDED * 2);
 	GFX.Delta = (GFX.SubScreen - GFX.Screen) >> 1;
 	GFX.PPL = GFX.Pitch >> 1;
 	GFX.PPLx2 = GFX.Pitch;
@@ -575,6 +587,7 @@ int mainEntry(char* romname)
 	}
 
 	MenuInit(SYSTEM_DIR, &mMenuOptions);
+	DefaultMenuOptions();
 
 	while(1)
 	{
@@ -584,7 +597,7 @@ int mainEntry(char* romname)
 
 		if(event==EVENT_LOAD_ROM)
 		{
-			if (mRomName[0] != 0)
+			if (Memory.ROMFilename[0] != 0)
 			{
 				MenuMessageBox("Saving SRAM...","","",MENU_MESSAGE_BOX_MODE_MSG);
 				PSNESForceSaveSRAM();
@@ -593,6 +606,14 @@ int mainEntry(char* romname)
 			{
 				mRomName[0] = 0;
 				MenuMessageBox("Failed to load ROM",mRomName,"Press any button to continue", MENU_MESSAGE_BOX_MODE_PAUSE);
+				S9xGraphicsDeinit();
+				Memory.Deinit();
+				free(GFX.SubZBuffer);
+				free(GFX.ZBuffer);
+				free(GFX.SubScreen);
+				GFX.SubZBuffer=NULL;
+				GFX.ZBuffer=NULL;
+				GFX.SubScreen=NULL;
 				sal_Reset();
 		    		return 0;
 			}

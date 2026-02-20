@@ -58,12 +58,26 @@ brew install make zip git gmp libmpc mpfr
 git clone https://github.com/Maxi2555/pocketsnes-nspire.git
 cd pocketsnes-nspire
 
-# Build the .tns file
+# Build all four .tns variants
 make -f Makefile.nspire
 ```
 
-This produces **`pocketsnes.tns`** (and `PocketSNES-nspire.zip` containing the `.tns` and
-`README.md`).
+This produces **four `.tns` files** (and `PocketSNES-nspire.zip` containing all four and
+`README.md`):
+
+| File | Transparencies | Special chips | Speed |
+|------|---------------|---------------|-------|
+| `pocketsnes_minimal.tns` | No | No | Fastest |
+| `pocketsnes_notrans.tns` | No | Yes | Fast |
+| `pocketsnes_nochips.tns` | Yes | No | Medium |
+| `pocketsnes.tns` | Yes | Yes | Most compatible |
+
+**Start with `pocketsnes_minimal.tns`** for the best performance. If your game has missing
+graphics or behaves incorrectly, try the other variants in order until it works.
+
+"Special chips" refers to the SuperFX, SA1, C4 and SDD1 co-processors used by a small
+number of games (Star Fox, Super Mario RPG, Mega Man X2/X3, etc.).  Most games do not
+need them and run faster without them.
 
 To clean build artifacts:
 
@@ -74,12 +88,13 @@ make -f Makefile.nspire clean
 ### Transfer to the calculator
 
 1. Connect your TI-Nspire CX to your computer via USB.
-2. Open **TI-Nspire Student Software** (or **TI Connect CE**) and transfer `pocketsnes.tns`
-   to the `/documents/ndless/` folder on the calculator.
+2. Open **TI-Nspire Student Software** (or **TI Connect CE**) and transfer the desired
+   `.tns` file to the `/documents/ndless/` folder on the calculator.
 3. On the calculator, navigate to the file and press **Enter** to launch it.
    (Ndless must already be installed on the calculator.)
-4. Place your ROM files (`.sfc`, `.smc`, or `.zip`) in `/documents/ndless/` as well and pass
-   the path as an argument, or use the launcher script bundled with Ndless.
+4. Place your ROM files (`.sfc`, `.smc`, or `.zip`) in `/documents/ndless/` as well.
+   The built-in file browser lets you navigate to and select a ROM directly from the
+   calculator.
 
 CONTROLS
 ========
