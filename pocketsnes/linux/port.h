@@ -46,7 +46,9 @@
 
 //Required Includes
 #include "pixform.h"
-#include <zlib.h> 
+#if defined(ZLIB) || defined(UNZIP_SUPPORT)
+#include <zlib.h>
+#endif
 #include <limits.h>
 #include <string.h>
 
