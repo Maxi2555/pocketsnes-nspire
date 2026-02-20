@@ -88,9 +88,7 @@
 *******************************************************************************/
 
 #ifdef _TINSPIRE
-	#ifndef intptr_t
-		#define intptr_t int
-	#endif
+	#include <stdint.h>
 #endif
 
 #ifndef _GETSET_H_

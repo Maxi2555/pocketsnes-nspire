@@ -88,7 +88,7 @@
 *******************************************************************************/
 
 #ifdef _TINSPIRE
-	#define intptr_t int
+	#include <stdint.h>
 #endif
 
 #ifndef _CPUADDR_H_
