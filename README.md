@@ -29,14 +29,17 @@ and the packaging tools (`genzehn`, `make-prg`).
 **Install on Linux / macOS / Windows (WSL):**
 
 ```bash
-# 1. Clone the Ndless repository
-git clone --recursive https://github.com/ndless-nspire/Ndless.git
-cd Ndless
+# 1. Clone the Ndless repository into ~/ndless
+git clone --recursive https://github.com/ndless-nspire/Ndless.git ~/ndless
+cd ~/ndless
 
 # 2. Build and install the toolchain (~10–20 min)
 ndless-sdk/toolchain/build_toolchain.sh
 
-# 3. Add the toolchain to your PATH (add this line to ~/.bashrc or ~/.zshrc too)
+# 3. Build the Ndless SDK libraries (libnspireio, libndls, libsyscalls)
+make -C ndless-sdk
+
+# 4. Add the toolchain to your PATH (add these lines to ~/.bashrc or ~/.zshrc too)
 export PATH="$PATH:$HOME/ndless/ndless-sdk/toolchain/install/bin"
 export PATH="$PATH:$HOME/ndless/ndless-sdk/tools"
 ```
