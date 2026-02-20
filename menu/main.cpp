@@ -41,6 +41,7 @@ static u32 mVolumeTimer=0;
 static u32 mVolumeDisplayTimer=0;
 static u32 mFramesCleared=0;
 static u32 mInMenu=0;
+static u32 mNextFrameTime=0;
 
 static char tempromname[255];
 
@@ -206,16 +207,7 @@ uint32 S9xReadJoypad (int which1)
 	{
 		if(mRomName[0] != 0) Memory.SaveSRAM ((s8*)S9xGetFilename (".srm.tns"));
 		sal_InputIgnore();
-		S9xGraphicsDeinit();
-		Memory.Deinit();
-		free(GFX.SubZBuffer);
-		free(GFX.ZBuffer);
-		free(GFX.SubScreen);
-		GFX.SubZBuffer=NULL;
-		GFX.ZBuffer=NULL;
-		GFX.SubScreen=NULL;
-		sal_Reset();	
-		exit(0);
+		mEnterMenu = 1;
 		return val;
 	}
 	
@@ -273,15 +265,30 @@ void S9xSyncSpeed(void)
 {
 	if (Settings.SkipFrames == AUTO_FRAMERATE)
 	{
-		if (++IPPU.SkippedFrames < MAX_AUDIO_FRAMESKIP)
+		u32 now = sal_TimerRead();
+
+		if (mNextFrameTime == 0)
+			mNextFrameTime = now + 1;
+
+		if (now < mNextFrameTime)
 		{
+			/* Finished early: render this frame and busy-wait for the deadline */
+			IPPU.RenderThisFrame = TRUE;
+			IPPU.SkippedFrames = 0;
+			while (sal_TimerRead() < mNextFrameTime) {}
+		}
+		else if (++IPPU.SkippedFrames < MAX_AUDIO_FRAMESKIP)
+		{
+			/* Running behind: skip rendering to catch up */
 			IPPU.RenderThisFrame = FALSE;
 		}
 		else
 		{
+			/* Very far behind: force a render and resync */
 			IPPU.RenderThisFrame = TRUE;
 			IPPU.SkippedFrames = 0;
 		}
+		mNextFrameTime++;
 	}
 	else
 	{
@@ -364,6 +371,7 @@ static int Run(int sound)
 	Settings.SoundSync = mMenuOptions.soundSync;
 	Settings.SkipFrames = mMenuOptions.frameSkip == 0 ? AUTO_FRAMERATE : mMenuOptions.frameSkip - 1;
 	sal_TimerInit(Settings.FrameTime);
+	mNextFrameTime = 0;
 
   	while(!mEnterMenu) 
   	{
@@ -566,6 +574,8 @@ int mainEntry(char* romname)
 		sal_Reset();
 		return 0;
 	}
+
+	MenuInit(SYSTEM_DIR, &mMenuOptions);
 
 	while(1)
 	{
