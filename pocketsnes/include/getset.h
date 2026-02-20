@@ -88,7 +88,9 @@
 *******************************************************************************/
 
 #ifdef _TINSPIRE
-	#define intptr_t int
+	#ifndef intptr_t
+		#define intptr_t int
+	#endif
 #endif
 
 #ifndef _GETSET_H_
