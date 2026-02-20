@@ -5,6 +5,7 @@ TARGET = PocketSNES
 
 CC  := nspire-gcc
 CXX := nspire-g++
+LD  := nspire-ld
 STRIP := 
 
 ifdef V
@@ -18,8 +19,8 @@ endif
 INCLUDE = -Dndlib -I pocketsnes -Isal/linux/ -Isal/ -I sal/linux/include -I sal/include -I pocketsnes/include -I menu -I pocketsnes/linux -I pocketsnes/snes9x
 CFLAGS = -Os -nostdlib -fdata-sections -ffunction-sections -fomit-frame-pointer -marm -march=armv5te -mtune=arm926ej-s -DRC_OPTIMIZED -D__LINUX__ -DFOREVER_16_BIT -DNO_ASM -DNO_ROM_BROWSER $(INCLUDE)
 
-CXXFLAGS = $(CFLAGS)
-LDFLAGS = $(CXXFLAGS)  -nostdlib -Wl,--gc-sections -Wl,--as-needed -flto -lm
+CXXFLAGS = $(CFLAGS) -Wno-register -Wno-write-strings
+LDFLAGS = -nostdlib -Wl,--gc-sections -Wl,--as-needed -flto -lm
 
 # Find all source files
 SOURCE = pocketsnes/snes9x menu sal/linux sal
@@ -46,7 +47,7 @@ removeth:
 
 $(TARGET) : $(OBJS)
 	$(SUM) "  LD      $@"
-	$(CMD)$(CXX) $(CXXFLAGS) $^ $(LDFLAGS) -o $@
+	$(CMD)$(LD) $(LDFLAGS) -o $@ $^
 
 %.o: %.c
 	$(SUM) "  CC      $@"

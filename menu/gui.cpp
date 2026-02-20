@@ -607,7 +607,7 @@ void screen_showchar(int x, int y, unsigned char a, int fg_color, int bg_color)
 }
 
 /* Draw a string on-screen. Thanks Exphophase for the code ! (coming form Gpsp, GPLv2) */
-void print_string(char *s, unsigned short fg_color, unsigned short bg_color, int x, int y) 
+void print_string(const char *s, unsigned short fg_color, unsigned short bg_color, int x, int y) 
 {
 #ifdef ndlib
 	drawString(&x, &y, 0, s, fg_color, bg_color);

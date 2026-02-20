@@ -60,7 +60,7 @@ void refresh_cursor(unsigned char all);
 void draw_files_list();
 
 void screen_showchar(int x, int y, unsigned char a, int fg_color, int bg_color);
-void print_string(char *s, unsigned short fg_color, unsigned short bg_color, int x, int y);
+void print_string(const char *s, unsigned short fg_color, unsigned short bg_color, int x, int y);
 
 unsigned char is_folder(char* str1);
 void list_all_files(char* directory);
