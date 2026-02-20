@@ -2,6 +2,11 @@
 *.t
 *.sfc
 PocketSNES
+PocketSNES_notrans
+PocketSNES_nochips
+PocketSNES_minimal
+*.tns
+*.zip
 pocketsnes/snes9x/*.o
 menu/*.o
 sal/*.o
