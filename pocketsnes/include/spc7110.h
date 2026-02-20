@@ -88,6 +88,7 @@
 *******************************************************************************/
 #ifndef _spc7110_h
 #define _spc7110_h
+#include <time.h>
 #include "port.h"
 
 #define DECOMP_BUFFER_SIZE	0x10000
