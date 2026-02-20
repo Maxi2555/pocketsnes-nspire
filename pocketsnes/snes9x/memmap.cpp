@@ -111,7 +111,9 @@
 #include "spc7110.h"
 #include "seta.h"
 
+#ifdef UNZIP_SUPPORT
 #include "unzip/unzip.h"
+#endif
 
 #ifdef DS2_DMA
 #include "ds2_cpu.h"
@@ -3648,19 +3650,19 @@ void CMemory::ApplyROMFixes ()
 		strncmp (ROMId, "APB", 3) == 0 ||
 		((strncmp (ROMName, "Parlor", 6) == 0 || 
 		strcmp (ROMName, "HEIWA Parlor!Mini8") == 0 ||
-		strncmp (ROMName, "SANKYO Fever! Ì¨°ÊÞ°!", 21) == 0) &&
+		strncmp (ROMName, "SANKYO Fever! Ì¨ï¿½ï¿½Þ°!", 21) == 0) &&
 		strcmp (CompanyId, "A0") == 0) ||
 		strcmp (ROMName, "DARK KINGDOM") == 0 ||
 		strcmp (ROMName, "ZAN3 SFC") == 0 ||
 		strcmp (ROMName, "HIOUDEN") == 0 ||
-		strcmp (ROMName, "ÃÝ¼É³À") == 0 ||  //Tenshi no Uta 
+		strcmp (ROMName, "ï¿½Ý¼É³ï¿½") == 0 ||  //Tenshi no Uta 
 		strcmp (ROMName, "FORTUNE QUEST") == 0 ||
 		strcmp (ROMName, "FISHING TO BASSING") == 0 ||
 		strncmp (ROMName, "TokyoDome '95Battle 7", 21) == 0 ||
 		strcmp (ROMName, "OHMONO BLACKBASS") == 0 ||
 		strncmp (ROMName, "SWORD WORLD SFC", 15) == 0 ||
 		strcmp (ROMName, "MASTERS") ==0 || //Augusta 2 J
-		strcmp (ROMName, "SFC ¶ÒÝ×²ÀÞ°") == 0 || //Kamen Rider
+		strcmp (ROMName, "SFC ï¿½ï¿½ï¿½×²ï¿½Þ°") == 0 || //Kamen Rider
 		strncmp (ROMName, "LETs PACHINKO(", 14) == 0) //A set of BS games
     {
 		IAPU.OneCycle = 15;
@@ -3702,8 +3704,8 @@ void CMemory::ApplyROMFixes ()
     if (strcmp (ROMName, "ALIENS vs. PREDATOR") == 0)
 		SNESGameFixes.alienVSpredetorFix = TRUE;
 		
-    if (strcmp (ROMName, "½°Êß°Ì§Ð½À") == 0 ||  //Super Famista
-		strcmp (ROMName, "½°Êß°Ì§Ð½À 2") == 0 || //Super Famista 2
+    if (strcmp (ROMName, "ï¿½ï¿½ï¿½ß°Ì§Ð½ï¿½") == 0 ||  //Super Famista
+		strcmp (ROMName, "ï¿½ï¿½ï¿½ß°Ì§Ð½ï¿½ 2") == 0 || //Super Famista 2
 		strcmp (ROMName, "ZENKI TENCHIMEIDOU") == 0 ||
 		strcmp (ROMName, "GANBA LEAGUE") == 0)
     {
@@ -3964,7 +3966,7 @@ void CMemory::ApplyROMFixes ()
 	//Other
 
     // Additional game fixes by sanmaiwashi ...
-    if (strcmp (ROMName, "SFX Å²Ä¶ÞÝÀÞÑÓÉ¶ÞÀØ 1") == 0) //Gundam Knight Story
+    if (strcmp (ROMName, "SFX Å²Ä¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¶ï¿½ï¿½ï¿½ 1") == 0) //Gundam Knight Story
     {
 		bytes0x2000 [0xb18] = 0x4c;
 		bytes0x2000 [0xb19] = 0x4b;

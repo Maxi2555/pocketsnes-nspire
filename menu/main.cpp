@@ -3,8 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "unzip.h"
-#include "zip.h"
 #include "menu.h"
 #include "snes9x.h"
 #include "memmap.h"
