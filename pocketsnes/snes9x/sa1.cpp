@@ -88,7 +88,7 @@
 *******************************************************************************/
 
 #ifdef _TINSPIRE
-	#define intptr_t int
+	#include <stdint.h>
 #endif
 
 #include "snes9x.h"
