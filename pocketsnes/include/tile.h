@@ -107,7 +107,7 @@
     if (BG.Buffered [TileNumber] == BLANK_TILE) \
 	return; \
 \
-    register uint32 l; \
+    uint32 l; \
     uint16 *ScreenColors; \
     if (BG.DirectColourMode) \
     { \

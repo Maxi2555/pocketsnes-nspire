@@ -40,6 +40,7 @@ struct SAL_DIRECTORY_ENTRY
 struct SAL_DIR
 {
 	DIR *dir;
+	s8 path[SAL_MAX_PATH];
 };
 
 s32 sal_Init(void);

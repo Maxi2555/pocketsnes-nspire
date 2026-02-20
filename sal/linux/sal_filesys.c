@@ -46,8 +46,12 @@ s32 sal_DirectoryGetItemCount(const char *path, s32 *returnItemCount)
 s32 sal_DirectoryOpen(const char *path, struct SAL_DIR *d)
 {
 	d->dir=opendir(path);
-
-	if(d->dir) return SAL_OK;
+	if(d->dir)
+	{
+		strncpy(d->path, path, SAL_MAX_PATH - 1);
+		d->path[SAL_MAX_PATH - 1] = '\0';
+		return SAL_OK;
+	}
 	else return SAL_ERROR;
 }
 
@@ -85,10 +89,15 @@ s32 sal_DirectoryRead(struct SAL_DIR *d, struct SAL_DIRECTORY_ENTRY *dir)
 			{
 				strcpy(dir->filename,de->d_name);
 				strcpy(dir->displayName,de->d_name);
-				if (de->d_type == 4)
-				  dir->type=SAL_FILE_TYPE_DIRECTORY;
-				else
-				  dir->type=SAL_FILE_TYPE_FILE;
+				{
+					struct stat st;
+					char fullpath[SAL_MAX_PATH * 2];
+					snprintf(fullpath, sizeof(fullpath), "%s/%s", d->path, de->d_name);
+					if (stat(fullpath, &st) == 0 && S_ISDIR(st.st_mode))
+					  dir->type=SAL_FILE_TYPE_DIRECTORY;
+					else
+					  dir->type=SAL_FILE_TYPE_FILE;
+				}
 				return SAL_OK;
 			}
 			else
@@ -134,18 +143,23 @@ s32 sal_DirectoryGet(const char *path, struct SAL_DIRECTORY_ENTRY *dir,
 			}
 
 			//Is entry a file or directory
-			if (de->d_type == 4) // Directory
 			{
-				strcpy(dir[fileCount].filename,de->d_name);
-				strcpy(dir[fileCount].displayName,de->d_name);
-				dir[fileCount].type=SAL_FILE_TYPE_DIRECTORY;
-			}
-			else
-			{
-				//File
-				strcpy(dir[fileCount].filename,de->d_name);
-				strcpy(dir[fileCount].displayName,de->d_name);
-				dir[fileCount].type=SAL_FILE_TYPE_FILE;
+				struct stat st;
+				char fullpath[SAL_MAX_PATH * 2];
+				snprintf(fullpath, sizeof(fullpath), "%s/%s", path, de->d_name);
+				if (stat(fullpath, &st) == 0 && S_ISDIR(st.st_mode)) // Directory
+				{
+					strcpy(dir[fileCount].filename,de->d_name);
+					strcpy(dir[fileCount].displayName,de->d_name);
+					dir[fileCount].type=SAL_FILE_TYPE_DIRECTORY;
+				}
+				else
+				{
+					//File
+					strcpy(dir[fileCount].filename,de->d_name);
+					strcpy(dir[fileCount].displayName,de->d_name);
+					dir[fileCount].type=SAL_FILE_TYPE_FILE;
+				}
 			}
 			fileCount++;
 			startIndex++;
